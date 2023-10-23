@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class HoleController : MonoBehaviour
 {
-    [SerializeField] private Vector3 startPosition;
 
     private void OnCollisionEnter(Collision other) {
-        other.transform.position = startPosition;
+        Debug.Log("Ganhou");
+        other.gameObject.GetComponent<BallController>().StopBall();
     }
 }

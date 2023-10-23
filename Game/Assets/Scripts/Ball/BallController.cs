@@ -7,12 +7,20 @@ public class BallController : MonoBehaviour
     private Rigidbody rBody;
 
     private float stopVelocity = 0.05f;
+    private Vector3 lastSafePosition;
     private bool _isIdle;
 
     public bool isIdle { get => _isIdle; }
 
     private void Awake() {
         rBody = GetComponent<Rigidbody>();
+    }
+
+    public void Update(){
+        if(transform.position.y < -10){
+            transform.position = lastSafePosition;
+            StopBall();
+        }
     }
 
     private void FixedUpdate() {
@@ -29,5 +37,6 @@ public class BallController : MonoBehaviour
         rBody.velocity = Vector3.zero;
         rBody.angularVelocity = Vector3.zero;
         _isIdle = true;
+        lastSafePosition = transform.position;
     }
 }
