@@ -12,7 +12,6 @@ public class CameraController : MonoBehaviour
         if(MouseInfo.CastMouseClickRay(layer).HasValue) return;
 
         if(Input.GetMouseButtonDown(0)){
-            Debug.Log("entrou");
             freeLookCamera.m_YAxis.m_InputAxisName = "Mouse Y";
             freeLookCamera.m_XAxis.m_InputAxisName = "Mouse X";
         }

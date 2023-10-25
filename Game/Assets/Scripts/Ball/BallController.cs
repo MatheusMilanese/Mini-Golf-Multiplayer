@@ -39,4 +39,9 @@ public class BallController : MonoBehaviour
         _isIdle = true;
         lastSafePosition = transform.position;
     }
+
+    public void StartBall(Vector3 position){
+        transform.position = position;
+        StopBall();
+    }
 }

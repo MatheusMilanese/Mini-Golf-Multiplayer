@@ -22,6 +22,7 @@ public class LineForce : MonoBehaviour
 
     private void Awake() {
         ballController = GetComponent<BallController>();
+        lineRenderer.enabled = false;
     }
 
     void Update()
