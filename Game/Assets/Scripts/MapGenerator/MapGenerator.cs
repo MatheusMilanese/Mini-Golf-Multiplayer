@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
@@ -12,34 +13,44 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private List<GameObject> wallsPrefab;
 
     List<Vector2Int> positionMap;
-    Stack<GameObject> groundsMap = new Stack<GameObject>();
-    Stack<GameObject> wallsMap = new Stack<GameObject>();
+    Stack<GameObject> groundsMap = new();
+    Stack<GameObject> wallsMap = new();
 
-    Dictionary<Vector2Int, int> wallsConfigurationDictionary = new Dictionary<Vector2Int, int>();
+    Dictionary<Vector2Int, int> wallsConfigurationDictionary = new();
+
+    MeshFilter groundMesh;
+    List<int> triangles = new();
+    List<Vector3> vertices = new();
 
     public void GenerateMap(){
         wallsConfigurationDictionary.Clear();
+        triangles.Clear();
+        vertices.Clear();
+
         positionMap = gridGenerator.GeneratePath(sizeMap);
         CleanMap();
+
         for(int i = 0; i < positionMap.Count-1; i++){
             CreateGround(i, false);
+            TriangulateSquare(i);
+
             SetGroundConections(i, i+1);
             if(i > 0) SetGroundConections(i, i-1);
         }
+
         CreateGround(positionMap.Count-1, true);
         SetGroundConections(positionMap.Count-1, positionMap.Count-2);
         
         for(int i = 0; i < positionMap.Count; i++){
             CreateWall(i);
         }
+        CreateMesh();
     }
 
     void CreateWall(int index){
         int configuration = wallsConfigurationDictionary[positionMap[index]];
-        Debug.Log($"{index} {configuration}");
         Vector3 position = new Vector3(positionMap[index].x*10+5, 1.5f, positionMap[index].y*10-5);
         GameObject wall = Instantiate(wallsPrefab[configuration], position, Quaternion.identity);
-        // wall.name = $"Wall {positionMap[index].x} {positionMap[index].y}";
         wallsMap.Push(wall);
     }
 
@@ -90,5 +101,30 @@ public class MapGenerator : MonoBehaviour
         return new Vector3(gridGenerator.startPosition.x*10+5, 1.5f, gridGenerator.startPosition.y*10-5);
     }
 
+    void CreateMesh(){
+        Mesh mesh = new(){
+            vertices = vertices.ToArray(),
+            triangles = triangles.ToArray()
+        };
+        GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
+        mesh.RecalculateNormals();
+    }
+
+    void TriangulateSquare(int index){
+        int baseIndex = vertices.Count;
+        vertices.Add(new Vector3(positionMap[index].x*10, 1, positionMap[index].y*10));
+        vertices.Add(new Vector3(positionMap[index].x*10+10, 1, positionMap[index].y*10));
+        vertices.Add(new Vector3(positionMap[index].x*10+10, 1, positionMap[index].y*10-10));
+        vertices.Add(new Vector3(positionMap[index].x*10, 1, positionMap[index].y*10-10));
+
+        triangles.Add(baseIndex+0);
+        triangles.Add(baseIndex+1);
+        triangles.Add(baseIndex+3);
+
+        triangles.Add(baseIndex+1);
+        triangles.Add(baseIndex+2);
+        triangles.Add(baseIndex+3);
+    }
 
 }
